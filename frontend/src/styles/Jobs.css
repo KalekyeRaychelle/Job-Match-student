@@ -1,0 +1,171 @@
+.Jobs {
+  display: flex;
+  margin-left: 4%;
+  align-items: center;
+  margin-bottom: 2%;
+  max-height: 600px; 
+  
+}
+
+
+.jobCards {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 2rem;
+    width: 40%;
+    max-width: 600px;
+    justify-content: space-between;
+}
+  
+.CV-card,
+.description {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 300px;
+   
+}
+.CV-card,
+  .description label{
+    font-size: 20px;
+    letter-spacing: 0.1em;
+}
+input[type="file"],
+  textarea {
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+input[type="file"]{
+  background-color: #fff7e6;
+  border: 1px solid #facc15; 
+}
+
+
+button {
+    background-color: #f59e0b; 
+    color: white;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+  
+button:hover {
+    background-color: #d97706;
+
+}
+.feedback {
+  margin-top: 3%;
+  margin-left: 6%;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+.Feedback h2 {
+  text-align: center;
+  font-size: 45px;
+  font-weight: bold;
+  color: #ca8a04;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.feedback-sections {
+
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.feedback-sections > div {
+  flex: 1;
+  min-width: 250px;
+  padding: 1rem;
+  background-color: #fefce8; 
+  border: 2px dashed #facc15;
+  border-radius: 0.75rem;
+  margin-bottom:6%;
+}
+
+.feedback-sections h3 {
+  color: #ca8a04;
+  margin-bottom: 0.5rem;
+}
+
+ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  line-height: 1.5;
+}
+
+.courses {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #fef9c3;
+  border: 2px dashed #facc15;
+  border-radius: 0.75rem;
+}
+
+.courses h3 {
+  color: #a16207;
+  margin-bottom: 0.5rem;
+}
+
+.courses ul li a {
+  color: black;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+  line-height: 1.5;
+}
+
+.courses ul li a:hover {
+  color: #ca8a04;
+  font-weight: 600;
+}
+
+.btnSection{
+  display:flex;
+}
+.dot-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  height: 50px;
+  margin-top: 10px;
+  
+  
+}
+
+.dot-loader span {
+  width: 12px;
+  height: 12px;
+  background-color: #ffc107; 
+  animation: bounce 0.6s infinite ease-in-out;
+}
+
+.dot-loader span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot-loader span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
