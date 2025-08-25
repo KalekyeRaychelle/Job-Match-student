@@ -12,12 +12,12 @@ import requests
 import time
 
 
+load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 application = Flask(__name__)
 CORS(application,origins=["http://localhost:3575"])
 
-load_dotenv()
 
 
 print("OpenAI Key (partial):", os.getenv("OPENAI_API_KEY")[:8])
