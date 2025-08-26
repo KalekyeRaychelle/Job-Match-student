@@ -6,17 +6,27 @@ import { useJobContext } from '../context/JobContext';
 
 const ChatPrep = () => {
   const [questions, setQuestions] = useState(() => {
+  try {
     const saved = localStorage.getItem('chatprep_questions');
-    return saved ? JSON.parse(saved) : [];
-  });
+    return saved && saved !== "undefined" ? JSON.parse(saved) : [];
+  } catch (e) {
+    console.error("Failed to parse chatprep_questions:", e);
+    return [];
+  }
+});
 
-  const [qaList, setQaList] = useState(() => {
+const [qaList, setQaList] = useState(() => {
+  try {
     const saved = localStorage.getItem('chatprep_qaList');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [loadingQuestions, setLoadingQuestions] = useState(false);
+    return saved && saved !== "undefined" ? JSON.parse(saved) : [];
+  } catch (e) {
+    console.error("Failed to parse chatprep_qaList:", e);
+    return [];
+  }
+});
 
   const { jobDescription } = useJobContext();
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
 
   const handleSubmit = async (question) => {
     const updatedQaList = [...qaList, { question, answer: '...' }];
@@ -52,37 +62,39 @@ const ChatPrep = () => {
     }
   };
   useEffect(() => {
-    const fetchQuestions = async () => {
-      const storedQuestions = localStorage.getItem('chatprep_questions');
-      if (storedQuestions) {
-        setQuestions(JSON.parse(storedQuestions));
-        return; 
-      }
-  
-      if (!jobDescription) return;
-  
-      setLoadingQuestions(true);
-  
-      try {
-        const res = await fetch('http://localhost:5000/get-questions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ job_description: jobDescription }),
-        });
-  
-        const data = await res.json();
-        setQuestions(data.questions);
-        localStorage.setItem('chatprep_questions', JSON.stringify(data.questions));
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoadingQuestions(false);
-      }
-    };
-  
-    fetchQuestions();
-  }, [jobDescription]);
-  
+  const fetchQuestions = async () => {
+    const storedQuestions = localStorage.getItem('chatprep_questions');
+    if (storedQuestions) {
+      setQuestions(JSON.parse(storedQuestions));
+      return; 
+    }
+
+    if (!jobDescription) return;
+
+    setLoadingQuestions(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', jobDescription); 
+
+      const res = await fetch('http://localhost:5000/get-questions', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      setQuestions(data.questions);
+      localStorage.setItem('chatprep_questions', JSON.stringify(data.questions));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
+
+  fetchQuestions();
+}, [jobDescription]);
+
   useEffect(() => {
     const handleBeforeUnload = () => {
       localStorage.removeItem('chatprep_questions');

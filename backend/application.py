@@ -45,13 +45,22 @@ def is_valid_url(url):
 def index():
     return "Backend is running"
 
+
 @application.route('/get-questions', methods=['POST'])
 def generate_questions():
-    data = request.json
-    job_description = data.get('job_description')
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
 
-    if not job_description:
-        return jsonify({'error': 'Missing job description'}), 400
+    pdf_file = request.files['file']
+
+  
+    try:
+        job_description = extract_text_from_pdf(pdf_file)
+    except Exception as e:
+        return jsonify({'error': f'Failed to extract text from PDF: {str(e)}'}), 500
+
+    if not job_description.strip():
+        return jsonify({'error': 'PDF contains no extractable text'}), 400
 
     prompt = f"Based on the following job description, generate 10 common interview questions and their answers in the format Q: ... A: ...\n\n{job_description}"
 
@@ -66,8 +75,7 @@ def generate_questions():
 
     qa_pairs = []
     lines = answer_text.split('\n')
-    current_q = ''
-    current_a = ''
+    current_q, current_a = '', ''
     for line in lines:
         if line.strip().startswith("Q:"):
             if current_q and current_a:
@@ -83,7 +91,6 @@ def generate_questions():
         qa_pairs.append({'question': current_q, 'answer': current_a})
 
     return jsonify({'questions': qa_pairs})
-
 @application.route('/Ask', methods=['POST'])
 def Ask():
     try:

@@ -45,38 +45,38 @@ const Jobs = () => {
   };
 
   // Analyze button
-  const handleAnalyzeClick = async () => {
-    if (!jobDescriptionFile || !cvFile) {
-      alert('Please upload both the job description and your CV.');
-      return;
-    }
+const handleAnalyzeClick = async () => {
+  if (!jobDescriptionFile || !cvFile) {
+    alert('Please upload both the job description and your CV.');
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append('job_description', jobDescriptionFile); // now file
-    formData.append('cv', cvFile);
+  const formData = new FormData();
+  formData.append('job_description', jobDescriptionFile); 
+  formData.append('cv', cvFile);
 
-    setLoadingFeedback(true);
+  setLoadingFeedback(true);
 
-    try {
-      const response = await axios.post(
-        'http://localhost:5000/analyze',
-        formData
-      );
+  try {
+    const response = await axios.post(
+      'http://localhost:5000/analyze',
+      formData
+    );
 
-      setFeedback(response.data.feedback);
-      localStorage.setItem('feedback', JSON.stringify(response.data.feedback));
+    setFeedback(response.data.feedback);
+    localStorage.setItem('feedback', JSON.stringify(response.data.feedback));
 
-      // optional: keep global context for consistency
-      setGlobalJobDescription(jdFileName);
-    } catch (error) {
-      console.error('There was an error!', error);
-      alert('An error occurred while processing your request.');
-    } finally {
-      setLoadingFeedback(false);
-    }
-  };
+    setGlobalJobDescription(jobDescriptionFile);
 
-  // Clear localStorage when page is closed
+  } catch (error) {
+    console.error('There was an error!', error);
+    alert('An error occurred while processing your request.');
+  } finally {
+    setLoadingFeedback(false);
+  }
+};
+
+
   useEffect(() => {
     const handleBeforeUnload = () => {
       localStorage.removeItem('feedback');
@@ -100,7 +100,7 @@ const Jobs = () => {
 
         {/* JD Upload */}
         <div className='description'>
-          <label>Upload Job Description (PDF/DOC/TXT):</label>
+          <label>Upload Job Description (PDF):</label>
           <input
             type='file'
             accept='.pdf,.doc,.docx,.txt'
