@@ -8,7 +8,7 @@ const Header = () => {
       
         <ul>
          
-          <li><Link to='/'>Skill Match Analysis</Link></li>
+          <li><Link to='/SkillMatch'>Skill Match Analysis</Link></li>
           <li><Link to='/ChatPrep'>Quick Chat Prep</Link></li>
 
         </ul>

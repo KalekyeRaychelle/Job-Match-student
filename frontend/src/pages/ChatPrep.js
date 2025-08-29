@@ -5,29 +5,44 @@ import '../styles/ChatPrep.css';
 import { useJobContext } from '../context/JobContext';
 
 const ChatPrep = () => {
+  // -------------------- STATE MANAGEMENT --------------------
+  // Store generated interview questions (from job description)
   const [questions, setQuestions] = useState(() => {
-  try {
-    const saved = localStorage.getItem('chatprep_questions');
-    return saved && saved !== "undefined" ? JSON.parse(saved) : [];
-  } catch (e) {
-    console.error("Failed to parse chatprep_questions:", e);
-    return [];
-  }
-});
+    try {
+      const saved = localStorage.getItem('chatprep_questions');
+      return saved && saved !== "undefined" ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error("Failed to parse chatprep_questions:", e);
+      return [];
+    }
+  });
 
-const [qaList, setQaList] = useState(() => {
-  try {
-    const saved = localStorage.getItem('chatprep_qaList');
-    return saved && saved !== "undefined" ? JSON.parse(saved) : [];
-  } catch (e) {
-    console.error("Failed to parse chatprep_qaList:", e);
-    return [];
-  }
-});
+  // Store Q&A history from user prompts (custom questions asked to GPT)
+  const [qaList, setQaList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('chatprep_qaList');
+      return saved && saved !== "undefined" ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error("Failed to parse chatprep_qaList:", e);
+      return [];
+    }
+  });
 
+  // Context: job description file uploaded earlier
   const { jobDescription } = useJobContext();
+
+  // Loading state while fetching interview questions
   const [loadingQuestions, setLoadingQuestions] = useState(false);
 
+  // -------------------- FUNCTIONS --------------------
+
+  /**
+   * handleSubmit
+   * - Handles custom questions typed by the user in Prompt component
+   * - Adds placeholder answer ("...") while waiting
+   * - Sends the question to backend (/Ask route)
+   * - Updates localStorage + state with GPT’s response
+   */
   const handleSubmit = async (question) => {
     const updatedQaList = [...qaList, { question, answer: '...' }];
     setQaList(updatedQaList);
@@ -42,6 +57,7 @@ const [qaList, setQaList] = useState(() => {
 
       const data = await response.json();
 
+      // Replace placeholder with actual GPT answer
       const finalQaList = updatedQaList.map((qa, i) =>
         i === updatedQaList.length - 1 ? { ...qa, answer: data.answer } : qa
       );
@@ -51,6 +67,7 @@ const [qaList, setQaList] = useState(() => {
     } catch (err) {
       console.error(err);
 
+      // Handle errors gracefully (replace with fallback answer)
       const errorQaList = updatedQaList.map((qa, i) =>
         i === updatedQaList.length - 1
           ? { ...qa, answer: 'Something went wrong. Try again.' }
@@ -61,40 +78,53 @@ const [qaList, setQaList] = useState(() => {
       localStorage.setItem('chatprep_qaList', JSON.stringify(errorQaList));
     }
   };
+
+  // -------------------- EFFECTS --------------------
+
+  /**
+   * Fetch 10 interview questions based on uploaded job description
+   * - If questions exist in localStorage, load them from there
+   * - Otherwise, send job description file to backend (/get-questions)
+   * - Store result in state + localStorage
+   */
   useEffect(() => {
-  const fetchQuestions = async () => {
-    const storedQuestions = localStorage.getItem('chatprep_questions');
-    if (storedQuestions) {
-      setQuestions(JSON.parse(storedQuestions));
-      return; 
-    }
+    const fetchQuestions = async () => {
+      const storedQuestions = localStorage.getItem('chatprep_questions');
+      if (storedQuestions) {
+        setQuestions(JSON.parse(storedQuestions));
+        return; 
+      }
 
-    if (!jobDescription) return;
+      if (!jobDescription) return;
 
-    setLoadingQuestions(true);
+      setLoadingQuestions(true);
 
-    try {
-      const formData = new FormData();
-      formData.append('file', jobDescription); 
+      try {
+        const formData = new FormData();
+        formData.append('file', jobDescription); 
 
-      const res = await fetch('http://localhost:5000/get-questions', {
-        method: 'POST',
-        body: formData,
-      });
+        const res = await fetch('http://localhost:5000/get-questions', {
+          method: 'POST',
+          body: formData,
+        });
 
-      const data = await res.json();
-      setQuestions(data.questions);
-      localStorage.setItem('chatprep_questions', JSON.stringify(data.questions));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingQuestions(false);
-    }
-  };
+        const data = await res.json();
+        setQuestions(data.questions);
+        localStorage.setItem('chatprep_questions', JSON.stringify(data.questions));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingQuestions(false);
+      }
+    };
 
-  fetchQuestions();
-}, [jobDescription]);
+    fetchQuestions();
+  }, [jobDescription]);
 
+  /**
+   * Clear stored data when the page reloads or tab closes
+   * - Prevents old questions and answers from persisting forever
+   */
   useEffect(() => {
     const handleBeforeUnload = () => {
       localStorage.removeItem('chatprep_questions');
@@ -103,16 +133,15 @@ const [qaList, setQaList] = useState(() => {
   
     window.addEventListener('beforeunload', handleBeforeUnload);
   
-    // Clean up the listener when the component unmounts
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
   
- 
-  
+  // -------------------- RENDER --------------------
   return (
     <div className='ChatPrep'>
+        {/* Section: Auto-generated 10 interview questions */}
         <div className="questions">
             <h2>TEN QUESTIONS TO BE ASKED</h2>
 
@@ -134,20 +163,22 @@ const [qaList, setQaList] = useState(() => {
             )}
         </div>
 
-      <div className="chatprep-container">
-        <h2 className="chatprep-header">Interview Helper Agent</h2>
+        {/* Section: Chat-based Interview Helper (user Q&A with GPT) */}
+        <div className="chatprep-container">
+          <h2 className="chatprep-header">Interview Helper Agent</h2>
 
-        <div className="chatprep-body">
-          {qaList.map((item, idx) => (
-            <div key={idx} className="qa-item">
-              <p><strong>Q:</strong> {item.question}</p>
-              <p><strong>A:</strong> {item.answer}</p>
-            </div>
-          ))}
+          <div className="chatprep-body">
+            {qaList.map((item, idx) => (
+              <div key={idx} className="qa-item">
+                <p><strong>Q:</strong> {item.question}</p>
+                <p><strong>A:</strong> {item.answer}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Input component for asking custom questions */}
+          <Prompt onSubmit={handleSubmit} />
         </div>
-
-        <Prompt onSubmit={handleSubmit} />
-      </div>
     </div>
   );
 };

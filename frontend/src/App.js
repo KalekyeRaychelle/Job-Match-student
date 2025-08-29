@@ -6,14 +6,14 @@ import Heading from './components/Heading';
 import Jobs from "./pages/Jobs";
 import { JobProvider } from "./context/JobContext";
 import PrepHeading from "./components/PrepHeading";
-
+import Authentication from './pages/Authentication';
 
 function App() {
   const location = useLocation();
-
+  
   const path = location.pathname;
 
-  const showHeader = path === '/' || path === '/ChatPrep';
+  const showHeader = path === '/SkillMatch' || path === '/ChatPrep';
   
 
   return (
@@ -21,13 +21,15 @@ function App() {
       {showHeader && <Header />}
       
       
-      {(path === '/') && <Heading />}
+      {(path === '/SkillMatch') && <Heading />}
       {path === '/ChatPrep' && <PrepHeading />}
 
       <JobProvider>
         <Routes>
+          <Route path="/" element={<Authentication />} />
           <Route path="/ChatPrep" element={<ChatPrep />} />
-          <Route path="/" element={<Jobs />} />
+          <Route path="/SkillMatch" element={<Jobs />} />
+          
         </Routes>
       </JobProvider>
     </div>

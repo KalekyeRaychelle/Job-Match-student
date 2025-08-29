@@ -1,0 +1,124 @@
+
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f9fafb;
+  font-family: 'Arial', sans-serif;
+}
+
+.auth-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  margin-top: 7%;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 12px 20px;
+  margin: 0 5px;
+  border: 2px solid #facc15;
+  border-radius: 6px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s ease;
+}
+
+.toggle-btn.active {
+  background: #facc15;
+  color: #000;
+}
+
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  padding: 25px;
+  border: 2px solid #facc15;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  /*margin-top:2%;*/
+}
+
+.form-title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #facc15;
+}
+
+.auth-form input {
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.auth-form input:focus {
+  border-color: #facc15;
+  box-shadow: 0 0 5px #facc15;
+}
+
+
+.nextHeading {
+    font-size: 70px;
+    position: absolute;
+    top:-5%;
+    left: 40%;
+    font-weight: 400;
+    font-style: italic;
+    font-family: "Lato", serif;
+    color: black;
+    z-index: 1; 
+}
+
+.text {
+    display: inline-block;
+}
+.letter {
+    display: inline-block;
+    transform: translateY(0);
+    color: black;
+    animation: animateLetter 2s ease-in-out infinite;
+    animation-fill-mode: forwards;
+}
+@keyframes animateLetter {
+    0% {
+        transform: translateY(0);
+        color: black;
+    }
+    30% {
+        transform: translateY(-10px);
+        color: #e3b912;
+    }
+    60% {
+        transform: translateY(-10px);
+        color: #facc15;
+    }
+    100% {
+        transform: translateY(0);
+        color: black;
+    }
+}
+.submit-btn {
+  margin-top: 15px;
+  padding: 12px;
+  background: #facc15;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.submit-btn:hover {
+  background: #eab308;
+}

@@ -5,10 +5,15 @@ import '../styles/Jobs.css';
 import { useJobContext } from '../context/JobContext';
 
 const Jobs = () => {
+  // -------------------- STATE --------------------
+  // Store uploaded job description + CV files
   const [jobDescriptionFile, setJobDescriptionFile] = useState(null);
   const [cvFile, setCvFile] = useState(null);
+
+  // Loading indicator while backend analyzes CV vs JD
   const [loadingFeedback, setLoadingFeedback] = useState(false);
 
+  // File names for display (loaded from localStorage if available)
   const [cvFileName, setCvFileName] = useState(() => {
     return localStorage.getItem('cvFileName') || '';
   });
@@ -17,14 +22,22 @@ const Jobs = () => {
     return localStorage.getItem('jobDescriptionFileName') || '';
   });
 
+  // Store feedback results (similarities, missing skills, courses, etc.)
   const [feedback, setFeedback] = useState(() => {
     const saved = localStorage.getItem('feedback');
     return saved ? JSON.parse(saved) : null;
   });
 
+  // Global state (so job description can also be used in ChatPrep.js)
   const { setJobDescription: setGlobalJobDescription } = useJobContext();
 
-  // CV Upload
+  // -------------------- HANDLERS --------------------
+
+  /**
+   * Handle CV file upload
+   * - Saves file to state
+   * - Stores file name in localStorage (for persistence across reloads)
+   */
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -34,7 +47,11 @@ const Jobs = () => {
     }
   };
 
-  // JD Upload
+  /**
+   * Handle Job Description file upload
+   * - Saves file to state
+   * - Stores file name in localStorage
+   */
   const handleJDFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -44,39 +61,52 @@ const Jobs = () => {
     }
   };
 
-  // Analyze button
-const handleAnalyzeClick = async () => {
-  if (!jobDescriptionFile || !cvFile) {
-    alert('Please upload both the job description and your CV.');
-    return;
-  }
+  /**
+   * Handle "Analyze" button click
+   * - Validates both files are uploaded
+   * - Sends them to backend (/analyze)
+   * - Receives AI feedback (match %, similarities, missing skills, course links)
+   * - Stores feedback in state + localStorage
+   * - Also updates global JobContext for use in ChatPrep
+   */
+  const handleAnalyzeClick = async () => {
+    if (!jobDescriptionFile || !cvFile) {
+      alert('Please upload both the job description and your CV.');
+      return;
+    }
 
-  const formData = new FormData();
-  formData.append('job_description', jobDescriptionFile); 
-  formData.append('cv', cvFile);
+    const formData = new FormData();
+    formData.append('job_description', jobDescriptionFile); 
+    formData.append('cv', cvFile);
 
-  setLoadingFeedback(true);
+    setLoadingFeedback(true);
 
-  try {
-    const response = await axios.post(
-      'http://localhost:5000/analyze',
-      formData
-    );
+    try {
+      const response = await axios.post(
+        'http://localhost:5000/analyze',
+        formData
+      );
 
-    setFeedback(response.data.feedback);
-    localStorage.setItem('feedback', JSON.stringify(response.data.feedback));
+      setFeedback(response.data.feedback);
+      localStorage.setItem('feedback', JSON.stringify(response.data.feedback));
 
-    setGlobalJobDescription(jobDescriptionFile);
+      // Store JD globally so ChatPrep can generate interview questions from it
+      setGlobalJobDescription(jobDescriptionFile);
 
-  } catch (error) {
-    console.error('There was an error!', error);
-    alert('An error occurred while processing your request.');
-  } finally {
-    setLoadingFeedback(false);
-  }
-};
+    } catch (error) {
+      console.error('There was an error!', error);
+      alert('An error occurred while processing your request.');
+    } finally {
+      setLoadingFeedback(false);
+    }
+  };
 
+  // -------------------- EFFECTS --------------------
 
+  /**
+   * Clear stored data on page reload/exit
+   * - Ensures fresh uploads + feedback each session
+   */
   useEffect(() => {
     const handleBeforeUnload = () => {
       localStorage.removeItem('feedback');
@@ -88,17 +118,18 @@ const handleAnalyzeClick = async () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
+  // -------------------- RENDER --------------------
   return (
     <div className='Jobs'>
       <div className='jobCards'>
-        {/* CV Upload */}
+        {/* CV Upload Section */}
         <div className='CV-card'>
           <label>Upload CV (PDF):</label>
           <input type='file' accept='.pdf' onChange={handleFileChange} />
           {cvFileName && <p>Selected CV: {cvFileName}</p>}
         </div>
 
-        {/* JD Upload */}
+        {/* Job Description Upload Section */}
         <div className='description'>
           <label>Upload Job Description (PDF):</label>
           <input
@@ -109,15 +140,16 @@ const handleAnalyzeClick = async () => {
           {jdFileName && <p>Selected JD: {jdFileName}</p>}
         </div>
 
-        {/* Analyze */}
+        {/* Analyze Button */}
         <div className='btnSection'>
           <button onClick={handleAnalyzeClick}>Analyze</button>
         </div>
       </div>
 
-      {/* Feedback */}
+      {/* Feedback Section */}
       <div className='feedback'>
         {loadingFeedback ? (
+          // Loader animation while waiting for backend
           <div className='dot-loader'>
             <span></span>
             <span></span>
@@ -129,6 +161,7 @@ const handleAnalyzeClick = async () => {
               <h2>You have a {feedback.match_percentage}% match</h2>
 
               <div className='feedback-sections'>
+                {/* List similarities */}
                 <div>
                   <h3>Similarities:</h3>
                   <ul>
@@ -138,6 +171,7 @@ const handleAnalyzeClick = async () => {
                   </ul>
                 </div>
 
+                {/* List missing skills */}
                 <div>
                   <h3>What is missing from your CV:</h3>
                   <ul>
@@ -148,6 +182,7 @@ const handleAnalyzeClick = async () => {
                 </div>
               </div>
 
+              {/* Recommended courses section */}
               <div className='courses'>
                 <h3>Recommended Courses to bridge the gap</h3>
                 <ul>
